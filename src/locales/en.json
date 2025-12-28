@@ -1,0 +1,198 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "done": "Done",
+    "error": "Error",
+    "days": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    }
+  },
+  "alarm": {
+    "title": "Alarms",
+    "addNew": "Add Alarm",
+    "time": "Time",
+    "repeat": "Repeat",
+    "noAlarms": "No alarms",
+    "addFirst": "Add your first alarm",
+    "newAlarm": "New Alarm",
+    "editAlarm": "Edit Alarm",
+    "name": "Alarm Name",
+    "label": "Label",
+    "repeatOnce": "Once",
+    "repeatDaily": "Daily",
+    "repeatWeekdays": "Weekdays",
+    "repeatWeekends": "Weekends",
+    "repeatCustom": "Custom",
+    "selectDays": "Select Days",
+    "preview": "Preview Alarm",
+    "loadError": "Failed to load alarm",
+    "saveError": "Failed to save alarm",
+    "validation": {
+      "selectDay": "Please select at least one day",
+      "nameRequired": "Alarm name is required",
+      "invalidTime": "Invalid alarm time format",
+      "repeatRequired": "Repeat pattern is required",
+      "invalidSettings": "Invalid alarm settings",
+      "invalidSnooze": "Invalid snooze settings"
+    }
+  },
+  "notifications": {
+    "channelName": "Alarms",
+    "channelDescription": "Alarm notifications",
+    "alarmTitle": "{{label}}",
+    "alarmBody": "Time to wake up!",
+    "permissionDenied": "Notification permissions are required for alarms to work",
+    "permissionDeniedTitle": "Permission Required"
+  },
+  "ringing": {
+    "dismiss": "Dismiss",
+    "snooze": "Snooze",
+    "snoozedFor": "Snoozed for {{minutes}} minutes",
+    "snoozeError": "Failed to snooze alarm",
+    "dismissError": "Failed to dismiss alarm",
+    "snoozeCount": "Snooze {{count}}/{{max}}"
+  },
+  "puzzles": {
+    "title": "Complete the Challenge",
+    "math": {
+      "title": "Solve the Math Problem",
+      "placeholder": "Enter answer",
+      "submit": "Submit",
+      "correct": "Correct!",
+      "incorrect": "Incorrect, try again"
+    },
+    "typing": {
+      "title": "Type the Following Text",
+      "placeholder": "Type here...",
+      "accuracy": "Accuracy: {{percent}}%",
+      "submit": "Submit",
+      "success": "Great job!",
+      "tryAgain": "Try again, accuracy must be above 90%"
+    },
+    "barcode": {
+      "title": "Scan a Barcode",
+      "instruction": "Point your camera at any barcode or QR code",
+      "success": "Barcode scanned successfully!",
+      "permissionDenied": "Camera permission is required",
+      "requestPermission": "Grant Permission"
+    },
+    "memory": {
+      "title": "Memory Game",
+      "instruction": "Match all pairs",
+      "moves": "Moves: {{count}}",
+      "success": "All pairs matched!",
+      "flip": "Tap to flip"
+    }
+  },
+  "challenges": {
+    "dismissChallenge": "Dismiss Challenge",
+    "snoozeChallenge": "Snooze Challenge",
+    "noneSelected": "None",
+    "selectChallenge": "Select Challenge",
+    "difficulty": "Difficulty",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "puzzleTypes": {
+    "math": "Math",
+    "typing": "Typing",
+    "barcode": "Barcode",
+    "memory": "Memory"
+  },
+  "sound": {
+    "title": "Alarm Sound",
+    "selectSound": "Select Sound",
+    "preview": "Preview",
+    "stopPreview": "Stop Preview",
+    "default": "Default",
+    "custom": "Custom",
+    "previewError": "Failed to play sound",
+    "sounds": {
+      "default": "Default",
+      "gentleAlarm": "Gentle Alarm",
+      "andromeda": "Andromeda",
+      "radar": "Radar",
+      "chimes": "Chimes"
+    },
+    "importCustom": "Import Custom Sound",
+    "customSounds": "Custom Sounds",
+    "deleteSound": "Delete Sound",
+    "importError": "Failed to import sound",
+    "importSuccess": "Sound imported successfully",
+    "fileTooLarge": "File size must be less than 10MB",
+    "invalidFormat": "Invalid audio format",
+    "gradualVolume": "Gradual Volume",
+    "gradualVolumeDescription": "Slowly increase volume over 30 seconds",
+    "loadError": "Failed to load alarm sound, using default"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageDescription": "Choose your preferred language",
+    "snoozeSettings": "Snooze Settings",
+    "snoozeDuration": "Snooze Duration",
+    "snoozeDurationDescription": "Duration of each snooze",
+    "maxSnoozeCount": "Max Snooze Count",
+    "maxSnoozeCountDescription": "Maximum number of times you can snooze",
+    "autoShorten": "Auto Shorten",
+    "autoShortenDescription": "Reduce snooze duration each time",
+    "shortenBy": "Shorten By",
+    "shortenByDescription": "Amount to reduce duration by",
+    "requireChallenge": "Require Challenge",
+    "requireChallengeDescription": "Solve a puzzle to snooze",
+    "progressiveDifficulty": "Progressive Difficulty",
+    "progressiveDifficultyDescription": "Increase puzzle difficulty with each snooze",
+    "minutes": "min",
+    "times": "times",
+    "english": "English",
+    "snoozeCount": "Snooze {{count}}/{{max}}"
+  },
+  "onboarding": {
+    "mathTitle": "Math Puzzle",
+    "mathDescription": "Solve simple math problems to dismiss or snooze your alarm. This helps wake up your brain!",
+    "typingTitle": "Typing Challenge",
+    "typingDescription": "Type the displayed text accurately. Great for improving focus and alertness.",
+    "barcodeTitle": "Barcode Scanner",
+    "barcodeDescription": "Scan any barcode or QR code to turn off the alarm. This gets you out of bed!",
+    "memoryTitle": "Memory Game",
+    "memoryDescription": "Match all card pairs to complete the challenge. Tests your memory and concentration.",
+    "gotIt": "Got it!",
+    "skip": "Skip"
+  },
+  "accessibility": {
+    "toggleAlarm": "Toggle alarm for {{time}} {{label}}",
+    "toggleHint": "Double tap to enable or disable this alarm",
+    "snoozeButton": "Snooze alarm for {{duration}} minutes",
+    "dismissButton": "Dismiss alarm",
+    "challengeRequired": "Challenge required to {{action}}",
+    "selectTime": "Select alarm time",
+    "timePickerHint": "Swipe up or down to change hours and minutes",
+    "alarmTime": "Alarm time {{time}}",
+    "mathInput": "Enter answer to math problem",
+    "typingInput": "Type the displayed text",
+    "cameraView": "Camera view for scanning barcode",
+    "memoryCard": "Memory card {{index}}, {{status}}"
+  },
+  "loading": {
+    "savingAlarm": "Saving alarm...",
+    "loadingSound": "Loading sound...",
+    "initializingCamera": "Initializing camera..."
+  }
+}

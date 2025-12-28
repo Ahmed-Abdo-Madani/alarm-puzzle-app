@@ -1,0 +1,198 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "done": "تم",
+    "error": "خطأ",
+    "days": {
+      "sun": "أحد",
+      "mon": "اثنين",
+      "tue": "ثلاثاء",
+      "wed": "أربعاء",
+      "thu": "خميس",
+      "fri": "جمعة",
+      "sat": "سبت",
+      "sunday": "الأحد",
+      "monday": "الاثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت"
+    }
+  },
+  "alarm": {
+    "title": "المنبهات",
+    "addNew": "إضافة منبه",
+    "time": "الوقت",
+    "repeat": "التكرار",
+    "noAlarms": "لا توجد منبهات",
+    "addFirst": "أضف منبهك الأول",
+    "newAlarm": "منبه جديد",
+    "editAlarm": "تعديل المنبه",
+    "name": "اسم المنبه",
+    "label": "تسمية",
+    "repeatOnce": "مرة واحدة",
+    "repeatDaily": "يومياً",
+    "repeatWeekdays": "أيام الأسبوع",
+    "repeatWeekends": "عطلة نهاية الأسبوع",
+    "repeatCustom": "مخصص",
+    "selectDays": "اختر الأيام",
+    "preview": "معاينة المنبه",
+    "loadError": "فشل تحميل المنبه",
+    "saveError": "فشل حفظ المنبه",
+    "validation": {
+      "selectDay": "يرجى اختيار يوم واحد على الأقل",
+      "nameRequired": "اسم المنبه مطلوب",
+      "invalidTime": "تنسيق وقت المنبه غير صالح",
+      "repeatRequired": "نمط التكرار مطلوب",
+      "invalidSettings": "إعدادات المنبه غير صالحة",
+      "invalidSnooze": "إعدادات الغفوة غير صالحة"
+    }
+  },
+  "notifications": {
+    "channelName": "المنبهات",
+    "channelDescription": "إشعارات المنبه",
+    "alarmTitle": "{{label}}",
+    "alarmBody": "حان وقت الاستيقاظ!",
+    "permissionDenied": "أذونات الإشعارات مطلوبة لعمل المنبهات",
+    "permissionDeniedTitle": "الإذن مطلوب"
+  },
+  "ringing": {
+    "dismiss": "إيقاف",
+    "snooze": "غفوة",
+    "snoozedFor": "تم التأجيل لمدة {{minutes}} دقيقة",
+    "snoozeError": "فشل تأجيل المنبه",
+    "dismissError": "فشل إيقاف المنبه",
+    "snoozeCount": "غفوة {{count}}/{{max}}"
+  },
+  "puzzles": {
+    "title": "أكمل التحدي",
+    "math": {
+      "title": "حل المسألة الرياضية",
+      "placeholder": "أدخل الإجابة",
+      "submit": "إرسال",
+      "correct": "صحيح!",
+      "incorrect": "خطأ، حاول مرة أخرى"
+    },
+    "typing": {
+      "title": "اكتب النص التالي",
+      "placeholder": "اكتب هنا...",
+      "accuracy": "الدقة: {{percent}}%",
+      "submit": "إرسال",
+      "success": "عمل رائع!",
+      "tryAgain": "حاول مرة أخرى، يجب أن تكون الدقة أعلى من 90%"
+    },
+    "barcode": {
+      "title": "امسح الباركود",
+      "instruction": "وجه الكاميرا نحو أي باركود أو رمز QR",
+      "success": "تم مسح الباركود بنجاح!",
+      "permissionDenied": "إذن الكاميرا مطلوب",
+      "requestPermission": "منح الإذن"
+    },
+    "memory": {
+      "title": "لعبة الذاكرة",
+      "instruction": "طابق جميع الأزواج",
+      "moves": "الحركات: {{count}}",
+      "success": "تم مطابقة جميع الأزواج!",
+      "flip": "اضغط للقلب"
+    }
+  },
+  "challenges": {
+    "dismissChallenge": "تحدي الإيقاف",
+    "snoozeChallenge": "تحدي الغفوة",
+    "noneSelected": "لا يوجد",
+    "selectChallenge": "اختر التحدي",
+    "difficulty": "الصعوبة",
+    "easy": "سهل",
+    "medium": "متوسط",
+    "hard": "صعب"
+  },
+  "puzzleTypes": {
+    "math": "رياضيات",
+    "typing": "كتابة",
+    "barcode": "باركود",
+    "memory": "ذاكرة"
+  },
+  "sound": {
+    "title": "نغمة المنبه",
+    "selectSound": "اختر النغمة",
+    "preview": "معاينة",
+    "stopPreview": "إيقاف المعاينة",
+    "default": "افتراضي",
+    "custom": "مخصص",
+    "previewError": "فشل تشغيل الصوت",
+    "sounds": {
+      "default": "افتراضي",
+      "gentleAlarm": "منبه لطيف",
+      "andromeda": "أندروميدا",
+      "radar": "رادار",
+      "chimes": "أجراس"
+    },
+    "importCustom": "استيراد نغمة مخصصة",
+    "customSounds": "نغمات مخصصة",
+    "deleteSound": "حذف النغمة",
+    "importError": "فشل استيراد النغمة",
+    "importSuccess": "تم استيراد النغمة بنجاح",
+    "fileTooLarge": "يجب أن يكون حجم الملف أقل من 10 ميجابايت",
+    "invalidFormat": "تنسيق صوتي غير صالح",
+    "gradualVolume": "زيادة تدريجية للصوت",
+    "gradualVolumeDescription": "زيادة مستوى الصوت تدريجياً على مدى 30 ثانية",
+    "loadError": "فشل تحميل نغمة المنبه، استخدام الافتراضية"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "languageDescription": "اختر لغتك المفضلة",
+    "snoozeSettings": "إعدادات الغفوة",
+    "snoozeDuration": "مدة الغفوة",
+    "snoozeDurationDescription": "مدة كل غفوة",
+    "maxSnoozeCount": "الحد الأقصى للغفوات",
+    "maxSnoozeCountDescription": "أقصى عدد مرات للغفوة",
+    "autoShorten": "تقصير تلقائي",
+    "autoShortenDescription": "تقليل مدة الغفوة في كل مرة",
+    "shortenBy": "تقصير بمقدار",
+    "shortenByDescription": "المقدار الذي يتم تقليل المدة به",
+    "requireChallenge": "تطلب تحدي",
+    "requireChallengeDescription": "حل لغز للغفوة",
+    "progressiveDifficulty": "صعوبة متزايدة",
+    "progressiveDifficultyDescription": "زيادة صعوبة اللغز مع كل غفوة",
+    "minutes": "دقيقة",
+    "times": "مرات",
+    "english": "الإنجليزية",
+    "arabic": "العربية"
+  },
+  "onboarding": {
+    "mathTitle": "لغز الرياضيات",
+    "mathDescription": "حل مسائل رياضية بسيطة لإيقاف أو تأجيل المنبه. هذا يساعد على إيقاظ عقلك!",
+    "typingTitle": "تحدي الكتابة",
+    "typingDescription": "اكتب النص المعروض بدقة. ممتاز لتحسين التركيز واليقظة.",
+    "barcodeTitle": "ماسح الباركود",
+    "barcodeDescription": "امسح أي باركود أو رمز QR لإيقاف المنبه. هذا يجعلك تنهض من السرير!",
+    "memoryTitle": "لعبة الذاكرة",
+    "memoryDescription": "طابق جميع أزواج البطاقات لإكمال التحدي. يختبر ذاكرتك وتركيزك.",
+    "gotIt": "فهمت!",
+    "skip": "تخطي"
+  },
+  "accessibility": {
+    "toggleAlarm": "تبديل المنبه لـ {{time}} {{label}}",
+    "toggleHint": "انقر مرتين لتمكين أو تعطيل هذا المنبه",
+    "snoozeButton": "تأجيل المنبه لمدة {{duration}} دقيقة",
+    "dismissButton": "إيقاف المنبه",
+    "challengeRequired": "التحدي مطلوب لـ {{action}}",
+    "selectTime": "اختر وقت المنبه",
+    "timePickerHint": "اسحب للأعلى أو الأسفل لتغيير الساعات والدقائق",
+    "alarmTime": "وقت المنبه {{time}}",
+    "mathInput": "أدخل إجابة المسألة الرياضية",
+    "typingInput": "اكتب النص المعروض",
+    "cameraView": "عرض الكاميرا لمسح الباركود",
+    "memoryCard": "بطاقة الذاكرة {{index}}، {{status}}"
+  },
+  "loading": {
+    "savingAlarm": "جاري حفظ المنبه...",
+    "loadingSound": "جاري تحميل الصوت...",
+    "initializingCamera": "جاري تهيئة الكاميرا..."
+  }
+}

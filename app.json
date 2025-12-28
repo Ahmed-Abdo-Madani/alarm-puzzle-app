@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "tmp",
-    "slug": "tmp",
+    "name": "Puzzle Alarm",
+    "slug": "puzzle-alarm",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,18 +13,59 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio",
+          "audio"
+        ],
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs camera access for barcode scanning challenges."
+      },
+      "bundleIdentifier": "com.anonymous.puzzlealarm"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "WAKE_LOCK",
+        "VIBRATE",
+        "android.permission.CAMERA"
+      ],
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "supportsRtl": true,
+      "package": "com.anonymous.puzzlealarm"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "react-native-reanimated/plugin",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#FF8C42",
+          "sounds": [
+            "./assets/sounds/default_alarm.mp3",
+            "./assets/sounds/gentle_alarm.mp3",
+            "./assets/sounds/andromeda.mp3",
+            "./assets/sounds/radar.mp3",
+            "./assets/sounds/chimes.mp3"
+          ]
+        }
+      ],
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "$(PRODUCT_NAME) needs camera access for barcode scanning challenges.",
+          "enableMicrophonePermission": false
+        }
+      ],
+      "expo-font"
+    ]
   }
 }
