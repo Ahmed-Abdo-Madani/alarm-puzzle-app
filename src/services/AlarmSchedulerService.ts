@@ -1,55 +1,68 @@
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 import { Alarm } from '../types/alarm';
-import { getNextOccurrence } from '../utils/alarmTime';
-import { mapRepeatDaysToExpoFormat } from '../utils/notificationUtils';
+import { getNextOccurrence, getNextOccurrencesForRepeating } from '../utils/alarmTime';
 import i18n from '../config/i18n';
 import { ALARM_CHANNEL_ID } from './NotificationChannelService';
+import NativeAlarmService from './NativeAlarmService';
 
 export const AlarmSchedulerService = {
   async scheduleAlarm(alarm: Alarm): Promise<string[]> {
     if (!alarm.enabled) return [];
 
-    const nextOccurrence = getNextOccurrence(alarm);
-    if (!nextOccurrence) return [];
-
-    const content = this.createNotificationContent(alarm);
-    const { hours, minutes } = this.parseTime(alarm.time);
     const notificationIds: string[] = [];
 
     if (alarm.repeatPattern === 'once') {
-      const id = await Notifications.scheduleNotificationAsync({
-        content,
-        trigger: { date: nextOccurrence },
-      });
-      notificationIds.push(id);
-    } else if (alarm.repeatPattern === 'daily') {
-      const id = await Notifications.scheduleNotificationAsync({
-        content,
-        trigger: { hour: hours, minute: minutes, repeats: true },
-      });
-      notificationIds.push(id);
-    } else {
-      // Handle weekdays, weekends, custom
-      let daysToSchedule: number[] = [];
-      if (alarm.repeatPattern === 'weekdays') {
-        daysToSchedule = [2, 3, 4, 5, 6]; // Mon-Fri (Expo 1-7)
-      } else if (alarm.repeatPattern === 'weekends') {
-        daysToSchedule = [1, 7]; // Sun, Sat (Expo 1-7)
-      } else if (alarm.repeatPattern === 'custom' && alarm.repeatDays) {
-        daysToSchedule = mapRepeatDaysToExpoFormat(alarm.repeatDays);
-      }
-
-      for (const day of daysToSchedule) {
+      const nextOccurrence = getNextOccurrence(alarm);
+      if (!nextOccurrence) return [];
+      
+      // Use native AlarmManager for reliable wake-up on Android
+      if (Platform.OS === 'android') {
+        try {
+          await NativeAlarmService.scheduleAlarm(alarm.id, nextOccurrence.getTime());
+          notificationIds.push(alarm.id);
+        } catch (error) {
+          console.error('Native alarm scheduling failed, falling back to notifications:', error);
+          // Fallback to expo-notifications
+          const content = this.createNotificationContent(alarm);
+          const id = await Notifications.scheduleNotificationAsync({
+            content,
+            trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: nextOccurrence },
+          });
+          notificationIds.push(id);
+        }
+      } else {
+        // iOS uses expo-notifications
+        const content = this.createNotificationContent(alarm);
         const id = await Notifications.scheduleNotificationAsync({
           content,
-          trigger: {
-            weekday: day,
-            hour: hours,
-            minute: minutes,
-            repeats: true,
-          },
+          trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: nextOccurrence },
         });
         notificationIds.push(id);
+      }
+    } else {
+      // For repeating alarms, schedule the next 7 occurrences
+      const occurrences = getNextOccurrencesForRepeating(alarm, 7);
+      
+      for (let i = 0; i < occurrences.length; i++) {
+        const occurrence = occurrences[i];
+        const uniqueId = `${alarm.id}_${i}`;
+        
+        if (Platform.OS === 'android') {
+          try {
+            await NativeAlarmService.scheduleAlarm(uniqueId, occurrence.getTime());
+            notificationIds.push(uniqueId);
+          } catch (error) {
+            console.error('Native alarm scheduling failed:', error);
+          }
+        } else {
+          const content = this.createNotificationContent(alarm);
+          const id = await Notifications.scheduleNotificationAsync({
+            content,
+            trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: occurrence },
+          });
+          notificationIds.push(id);
+        }
       }
     }
 
@@ -58,7 +71,21 @@ export const AlarmSchedulerService = {
 
   async cancelAlarm(alarm: Alarm): Promise<void> {
     if (alarm.notificationIds && alarm.notificationIds.length > 0) {
-      await Promise.all(alarm.notificationIds.map(id => Notifications.cancelScheduledNotificationAsync(id)));
+      for (const id of alarm.notificationIds) {
+        if (Platform.OS === 'android') {
+          try {
+            await NativeAlarmService.cancelAlarm(id);
+          } catch (error) {
+            console.error('Failed to cancel native alarm:', error);
+          }
+        }
+        // Also cancel any expo notifications
+        try {
+          await Notifications.cancelScheduledNotificationAsync(id);
+        } catch (error) {
+          // Ignore - notification may not exist
+        }
+      }
     }
   },
 
@@ -79,13 +106,18 @@ export const AlarmSchedulerService = {
     return {
       title: i18n.t('notifications.alarmTitle', { label: alarm.label || i18n.t('alarm.newAlarm') }),
       body: i18n.t('notifications.alarmBody'),
-      sound: 'default-alarm.mp3', // This should match the sound in app.json
+      sound: 'default_alarm', // Android uses raw resource name without extension
       priority: Notifications.AndroidNotificationPriority.MAX,
-      data: { alarmId: alarm.id },
-      categoryIdentifier: 'alarm',
-      android: {
-        channelId: ALARM_CHANNEL_ID,
+      sticky: true,
+      autoDismiss: false,
+      data: { 
+        alarmId: alarm.id,
+        isAlarm: true,
       },
+      categoryIdentifier: 'alarm',
+      ...(Platform.OS === 'android' && {
+        channelId: ALARM_CHANNEL_ID,
+      }),
     };
   },
 

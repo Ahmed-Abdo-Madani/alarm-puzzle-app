@@ -24,25 +24,25 @@ export const PuzzleOnboardingModal: React.FC<PuzzleOnboardingModalProps> = ({
 
   const getContent = () => {
     switch (puzzleType) {
-      case 'math':
+      case PuzzleType.MATH:
         return {
           title: 'onboarding.mathTitle',
           description: 'onboarding.mathDescription',
           Illustration: DesertSun,
         };
-      case 'typing':
+      case PuzzleType.TYPING:
         return {
           title: 'onboarding.typingTitle',
           description: 'onboarding.typingDescription',
           Illustration: Cactus,
         };
-      case 'barcode':
+      case PuzzleType.BARCODE:
         return {
           title: 'onboarding.barcodeTitle',
           description: 'onboarding.barcodeDescription',
           Illustration: DesertSun, // Placeholder
         };
-      case 'memory':
+      case PuzzleType.MEMORY:
         return {
           title: 'onboarding.memoryTitle',
           description: 'onboarding.memoryDescription',

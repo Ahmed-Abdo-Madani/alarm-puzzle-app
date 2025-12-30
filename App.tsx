@@ -1,8 +1,8 @@
-import 'react-native-reanimated';
+// import 'react-native-reanimated';
 import './src/config/i18n';
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, I18nManager, Alert, View, ActivityIndicator } from 'react-native';
+import { StyleSheet, I18nManager, Alert, View, ActivityIndicator, Platform, Linking } from 'react-native';
 import { I18nextProvider } from 'react-i18next';
 import * as Notifications from 'expo-notifications';
 import i18n from './src/config/i18n';
@@ -16,13 +16,30 @@ import { AlarmService } from './src/services/AlarmService';
 import { navigationRef, navigate } from './src/navigation/navigationRef';
 import { useAppFonts } from './src/config/fonts';
 import { theme } from './src/theme';
+import { getInitialAlarmId, addAlarmLinkListener } from './src/services/NativeAlarmService';
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async (notification) => {
+    const isAlarm = notification.request.content.data?.isAlarm;
+    
+    // For alarms, navigate immediately to ringing screen
+    if (isAlarm) {
+      const alarmId = notification.request.content.data.alarmId as string;
+      if (alarmId) {
+        // Small delay to ensure navigation is ready
+        setTimeout(() => {
+          navigate('AlarmRinging', { alarmId });
+        }, 100);
+      }
+    }
+    
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      priority: Notifications.AndroidNotificationPriority.MAX,
+    };
+  },
 });
 
 export default function App() {
@@ -52,6 +69,19 @@ export default function App() {
         
         // Reschedule active alarms
         await AlarmService.rescheduleActiveAlarms();
+        
+        // Check if app was launched from alarm
+        const initialAlarmId = await getInitialAlarmId();
+        if (initialAlarmId) {
+          // Extract the base alarm ID (remove the occurrence suffix like _0, _1, etc.)
+          const baseAlarmId = initialAlarmId.includes('_') 
+            ? initialAlarmId.substring(0, initialAlarmId.lastIndexOf('_'))
+            : initialAlarmId;
+          console.log('App launched from alarm:', baseAlarmId);
+          setTimeout(() => {
+            navigate('AlarmRinging', { alarmId: baseAlarmId });
+          }, 500);
+        }
       } catch (error) {
 
         console.error('Failed to initialize app settings:', error);
@@ -60,6 +90,15 @@ export default function App() {
     };
 
     initApp();
+
+    // Listen for alarm deep links
+    const removeAlarmListener = addAlarmLinkListener((alarmId) => {
+      const baseAlarmId = alarmId.includes('_') 
+        ? alarmId.substring(0, alarmId.lastIndexOf('_'))
+        : alarmId;
+      console.log('Received alarm deep link:', baseAlarmId);
+      navigate('AlarmRinging', { alarmId: baseAlarmId });
+    });
 
     const subscription = Notifications.addNotificationResponseReceivedListener(response => {
       const alarmId = response.notification.request.content.data.alarmId as string;
@@ -77,6 +116,7 @@ export default function App() {
     });
 
     return () => {
+      removeAlarmListener();
       subscription.remove();
       foregroundSubscription.remove();
     };

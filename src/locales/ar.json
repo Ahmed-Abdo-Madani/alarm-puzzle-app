@@ -5,6 +5,7 @@
     "delete": "حذف",
     "edit": "تعديل",
     "done": "تم",
+    "ok": "موافق",
     "error": "خطأ",
     "days": {
       "sun": "أحد",
@@ -43,6 +44,9 @@
     "preview": "معاينة المنبه",
     "loadError": "فشل تحميل المنبه",
     "saveError": "فشل حفظ المنبه",
+    "deleteTitle": "حذف المنبه",
+    "deleteConfirm": "هل أنت متأكد من حذف هذا المنبه؟",
+    "deleteError": "فشل حذف المنبه",
     "validation": {
       "selectDay": "يرجى اختيار يوم واحد على الأقل",
       "nameRequired": "اسم المنبه مطلوب",
@@ -63,7 +67,8 @@
   "ringing": {
     "dismiss": "إيقاف",
     "snooze": "غفوة",
-    "snoozedFor": "تم التأجيل لمدة {{minutes}} دقيقة",
+    "snoozed": "تم التأجيل",
+    "snoozedFor": "سيرن المنبه مرة أخرى بعد {{minutes}} دقيقة",
     "snoozeError": "فشل تأجيل المنبه",
     "dismissError": "فشل إيقاف المنبه",
     "snoozeCount": "غفوة {{count}}/{{max}}"

@@ -28,10 +28,11 @@ export const validateAlarmSettings = (settings: AlarmSettings): boolean => {
       return false;
     }
   }
+  const soundUriStr = typeof settings.soundUri === 'string' ? settings.soundUri : String(settings.soundUri);
   return (
     settings.volume >= 0 &&
     settings.volume <= 1 &&
-    settings.soundUri.length > 0 &&
+    soundUriStr.length > 0 &&
     settings.soundName.length > 0
   );
 };
@@ -53,13 +54,6 @@ export const validateAlarm = (alarm: Partial<Alarm>): { valid: boolean; errors: 
 
   if (alarm.repeatPattern === 'custom' && (!alarm.repeatDays || alarm.repeatDays.length === 0)) {
     errors.push('alarm.validation.selectDay');
-  }
-
-  if (alarm.repeatPattern === 'once' && alarm.time) {
-    const next = getNextOccurrence(alarm as Alarm);
-    if (!next || next <= new Date()) {
-      errors.push('alarm.validation.invalidTime');
-    }
   }
 
   if (alarm.settings && !validateAlarmSettings(alarm.settings)) {

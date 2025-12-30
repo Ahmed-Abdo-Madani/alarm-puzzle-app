@@ -3,7 +3,7 @@ import { TouchableOpacity, StyleSheet, Modal, FlatList, Alert, ActivityIndicator
 import { useTranslation } from 'react-i18next';
 import AudioService from '../services/AudioService';
 import CustomSoundService, { CustomSound } from '../services/CustomSoundService';
-import { DEFAULT_SOUNDS } from '../constants/sounds';
+import { DEFAULT_SOUNDS, getSoundSource } from '../constants/sounds';
 import { View } from './View';
 import { Text } from './Text';
 import { Button } from './Button';
@@ -50,7 +50,9 @@ export const SoundPickerComponent: React.FC<SoundPickerComponentProps> = ({
       }
       setLoadingPreview(uri);
       try {
-        await AudioService.loadSound(uri);
+        // Convert sound ID to actual source if needed
+        const soundSource = getSoundSource(uri);
+        await AudioService.loadSound(soundSource);
         await AudioService.playSound();
         setPreviewing(uri);
       } catch (error) {
@@ -109,15 +111,19 @@ export const SoundPickerComponent: React.FC<SoundPickerComponentProps> = ({
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    const isSelected = item.uri === soundUri || (soundUri === 'default' && item.id === 'default');
+    // For comparison, use the item's ID for default sounds
+    const isSelected = item.isCustom 
+      ? item.uri === soundUri 
+      : (item.id === soundUri || item.uri === soundUri);
     const displayName = item.isCustom ? item.name : t(item.nameKey);
-    const itemUri = item.uri;
+    // Store the ID for default sounds, URI for custom sounds
+    const valueToStore = item.isCustom ? item.uri : item.id;
 
     return (
       <View style={styles.soundItem}>
         <TouchableOpacity 
           style={[styles.soundSelect, isSelected && styles.selectedItem]}
-          onPress={() => handleSelect(itemUri, displayName)}
+          onPress={() => handleSelect(valueToStore, displayName)}
         >
           <Text style={[styles.soundName, isSelected && styles.selectedText]}>
             {displayName}
@@ -128,14 +134,14 @@ export const SoundPickerComponent: React.FC<SoundPickerComponentProps> = ({
         <View style={styles.itemActions}>
           <TouchableOpacity 
             style={styles.itemPreviewBtn}
-            onPress={() => handlePreview(itemUri)}
-            disabled={loadingPreview === itemUri}
+            onPress={() => handlePreview(item.uri)}
+            disabled={loadingPreview === item.uri}
           >
-            {loadingPreview === itemUri ? (
+            {loadingPreview === item.uri ? (
               <ActivityIndicator size="small" color={colors.primary} />
             ) : (
               <Text style={styles.itemActionText}>
-                {previewing === itemUri ? '■' : '▶'}
+                {previewing === item.uri ? '■' : '▶'}
               </Text>
             )}
           </TouchableOpacity>
@@ -212,7 +218,7 @@ export const SoundPickerComponent: React.FC<SoundPickerComponentProps> = ({
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <ActivityIndicator color={colors.white} />
+                    <ActivityIndicator color={colors.surface} />
                   ) : (
                     <Text style={styles.importText}>{t('sound.importCustom')}</Text>
                   )}
@@ -278,6 +284,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalHeader: {
+    ...flexRow(),
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  closeText: {
+    fontSize: 20,
+    color: colors.textSecondary,
+    padding: spacing.sm,
+  },
   modalContent: {
     backgroundColor: colors.background,
     borderTopLeftRadius: 20,
@@ -313,6 +335,46 @@ const styles = StyleSheet.create({
   selectedSoundName: {
     color: colors.primary,
     fontWeight: 'bold',
+  },
+  selectedItem: {
+    backgroundColor: colors.background,
+  },
+  selectedText: {
+    color: colors.primary,
+    fontWeight: 'bold',
+  },
+  itemActions: {
+    ...flexRow(),
+    alignItems: 'center',
+  },
+  itemPreviewBtn: {
+    padding: spacing.sm,
+  },
+  itemActionText: {
+    fontSize: 18,
+    color: colors.primary,
+  },
+  deleteBtn: {
+    padding: spacing.sm,
+  },
+  deleteText: {
+    fontSize: 16,
+    color: colors.error,
+  },
+  importBtn: {
+    backgroundColor: colors.primary,
+    padding: spacing.md,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  importText: {
+    color: colors.surface,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  listContent: {
+    paddingBottom: spacing.lg,
   },
   checkmark: {
     color: colors.primary,

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { ViewStyle } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring, withDelay } from 'react-native-reanimated';
 
 interface SlideInViewProps {
   children: React.ReactNode;

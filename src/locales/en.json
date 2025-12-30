@@ -5,6 +5,7 @@
     "delete": "Delete",
     "edit": "Edit",
     "done": "Done",
+    "ok": "OK",
     "error": "Error",
     "days": {
       "sun": "Sun",
@@ -43,6 +44,9 @@
     "preview": "Preview Alarm",
     "loadError": "Failed to load alarm",
     "saveError": "Failed to save alarm",
+    "deleteTitle": "Delete Alarm",
+    "deleteConfirm": "Are you sure you want to delete this alarm?",
+    "deleteError": "Failed to delete alarm",
     "validation": {
       "selectDay": "Please select at least one day",
       "nameRequired": "Alarm name is required",
@@ -63,7 +67,8 @@
   "ringing": {
     "dismiss": "Dismiss",
     "snooze": "Snooze",
-    "snoozedFor": "Snoozed for {{minutes}} minutes",
+    "snoozed": "Snoozed",
+    "snoozedFor": "Alarm will ring again in {{minutes}} minutes",
     "snoozeError": "Failed to snooze alarm",
     "dismissError": "Failed to dismiss alarm",
     "snoozeCount": "Snooze {{count}}/{{max}}"

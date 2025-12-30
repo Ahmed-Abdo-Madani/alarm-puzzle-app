@@ -5,7 +5,7 @@ import { View } from '../components/View';
 import { Text } from '../components/Text';
 import { Button } from '../components/Button';
 import { colors, spacing } from '../theme';
-import RNRestart from 'react-native-restart';
+import * as Updates from 'expo-updates';
 
 export const TestScreen = () => {
   const { t, i18n } = useTranslation();
@@ -18,8 +18,8 @@ export const TestScreen = () => {
     if (I18nManager.isRTL !== shouldBeRTL) {
       I18nManager.forceRTL(shouldBeRTL);
       // Restart is required for RTL changes to take effect in many cases
-      setTimeout(() => {
-        RNRestart.Restart();
+      setTimeout(async () => {
+        await Updates.reloadAsync();
       }, 100);
     }
   };

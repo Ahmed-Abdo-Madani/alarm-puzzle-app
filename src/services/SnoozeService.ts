@@ -20,7 +20,7 @@ class SnoozeService {
         data: { alarmId: alarm.id, isSnoozed: true, snoozeCount: snoozeCount + 1 },
         sound: 'default-alarm.mp3',
       },
-      trigger: triggerDate,
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: triggerDate },
     });
 
     return notificationId;

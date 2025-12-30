@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as RNLocalize from 'react-native-localize';
+import { getLocales } from 'expo-localization';
 
 import ar from '../locales/ar.json';
 import en from '../locales/en.json';
@@ -14,8 +14,9 @@ const languageDetector = {
   type: 'languageDetector' as const,
   async: true,
   detect: (callback: (lng: string) => void) => {
-    const bestLanguage = RNLocalize.findBestLanguageTag(['en', 'ar']);
-    callback(bestLanguage?.languageTag || 'en');
+    const locales = getLocales();
+    const bestLanguage = locales[0]?.languageCode || 'en';
+    callback(bestLanguage);
   },
   init: () => {},
   cacheUserLanguage: () => {},
@@ -31,7 +32,7 @@ i18n
     interpolation: {
       escapeValue: false,
     },
-    compatibilityJSON: 'v3',
+    compatibilityJSON: 'v4',
   });
 
 export default i18n;

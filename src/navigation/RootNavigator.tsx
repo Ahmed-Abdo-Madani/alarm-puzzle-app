@@ -1,6 +1,7 @@
 import { createStaticNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Text } from 'react-native';
 import { AlarmListScreen } from '../screens/AlarmListScreen';
 import { AlarmEditScreen } from '../screens/AlarmEditScreen';
 import { AlarmRingingScreen } from '../screens/AlarmRingingScreen';
@@ -14,18 +15,27 @@ const TabNavigator = createBottomTabNavigator({
       screen: AlarmListScreen,
       options: {
         title: 'Alarms',
+        tabBarIcon: ({ color, size }) => (
+          <Text style={{ fontSize: size, color }}>⏰</Text>
+        ),
       },
     },
     Settings: {
       screen: SettingsScreen,
       options: {
         title: 'Settings',
+        tabBarIcon: ({ color, size }) => (
+          <Text style={{ fontSize: size, color }}>⚙️</Text>
+        ),
       },
     },
     Test: {
       screen: TestScreen,
       options: {
         title: 'Test',
+        tabBarIcon: ({ color, size }) => (
+          <Text style={{ fontSize: size, color }}>🧪</Text>
+        ),
       },
     },
   },

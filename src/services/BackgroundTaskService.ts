@@ -6,7 +6,7 @@ export const ALARM_BACKGROUND_TASK = 'ALARM_BACKGROUND_TASK';
 export const BackgroundTaskService = {
   async registerTasks() {
     if (!TaskManager.isTaskDefined(ALARM_BACKGROUND_TASK)) {
-      TaskManager.defineTask(ALARM_BACKGROUND_TASK, ({ data, error }) => {
+      TaskManager.defineTask(ALARM_BACKGROUND_TASK, async ({ data, error }) => {
         if (error) {
           console.error('Background task error:', error);
           return;

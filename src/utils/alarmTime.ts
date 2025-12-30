@@ -38,7 +38,11 @@ export const getNextOccurrence = (alarm: Alarm, fromDate: Date = new Date()): Da
   nextDate.setHours(hours, minutes, 0, 0);
 
   if (alarm.repeatPattern === 'once') {
-    return nextDate > fromDate ? nextDate : null;
+    // If time has passed today, schedule for tomorrow
+    if (nextDate <= fromDate) {
+      nextDate.setDate(nextDate.getDate() + 1);
+    }
+    return nextDate;
   }
 
   const repeatDays = getRepeatDaysArray(alarm.repeatPattern, alarm.repeatDays);
@@ -98,4 +102,65 @@ export const getRepeatLabel = (alarm: Alarm, t: TFunction): string => {
     default:
       return t('alarm.repeatOnce', 'Once');
   }
+};
+
+/**
+ * Get the next N occurrences for a repeating alarm
+ * Used for Android which doesn't support CALENDAR trigger type
+ */
+export const getNextOccurrencesForRepeating = (alarm: Alarm, count: number = 7): Date[] => {
+  const occurrences: Date[] = [];
+  const { hours, minutes } = parseAlarmTime(alarm.time);
+  const now = new Date();
+  
+  if (alarm.repeatPattern === 'daily') {
+    // For daily alarms, schedule next 'count' days
+    for (let i = 0; i < count; i++) {
+      const nextDate = new Date(now);
+      nextDate.setDate(now.getDate() + i);
+      nextDate.setHours(hours, minutes, 0, 0);
+      
+      // Skip if this time has already passed today
+      if (nextDate > now) {
+        occurrences.push(nextDate);
+      } else if (i === 0) {
+        // If today's time passed, add tomorrow
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1);
+        tomorrow.setHours(hours, minutes, 0, 0);
+        occurrences.push(tomorrow);
+      }
+    }
+  } else {
+    // For weekdays, weekends, custom patterns
+    const repeatDays = getRepeatDaysArray(alarm.repeatPattern, alarm.repeatDays);
+    
+    if (repeatDays.length === 0) {
+      // Fallback to next occurrence
+      const next = getNextOccurrence(alarm);
+      if (next) occurrences.push(next);
+      return occurrences;
+    }
+    
+    let daysChecked = 0;
+    let currentDate = new Date(now);
+    
+    while (occurrences.length < count && daysChecked < 14) {
+      currentDate = new Date(now);
+      currentDate.setDate(now.getDate() + daysChecked);
+      currentDate.setHours(hours, minutes, 0, 0);
+      
+      // Check if this day matches the repeat pattern
+      if (repeatDays.includes(currentDate.getDay())) {
+        // Only add if it's in the future
+        if (currentDate > now) {
+          occurrences.push(new Date(currentDate));
+        }
+      }
+      
+      daysChecked++;
+    }
+  }
+  
+  return occurrences;
 };

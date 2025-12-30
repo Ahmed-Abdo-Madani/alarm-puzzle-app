@@ -1,119 +1,93 @@
-import TrackPlayer, { 
-  Capability, 
-  Event, 
-  RepeatMode, 
-  State,
-  AppKilledPlaybackBehavior
-} from 'react-native-track-player';
-import { Alert } from 'react-native';
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+import { Asset } from 'expo-asset';
 
 class AudioService {
+  private sound: Audio.Sound | null = null;
   private gradualVolumeInterval: NodeJS.Timeout | null = null;
-  private isInterrupted: boolean = false;
-  private wasPlayingBeforeInterruption: boolean = false;
   private isSetup: boolean = false;
+  private loadFailed: boolean = false;
 
   async setupPlayer() {
     if (this.isSetup) return;
     
     try {
-      await TrackPlayer.setupPlayer();
-      await TrackPlayer.updateOptions({
-        android: {
-          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
-        },
-        capabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.Stop,
-        ],
-        compactCapabilities: [
-          Capability.Play,
-          Capability.Pause,
-          Capability.Stop,
-        ],
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: true,
+        interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+        playThroughEarpieceAndroid: false,
       });
       
-      this.setupInterruptionHandling();
       this.isSetup = true;
     } catch (error) {
       console.error('Error setting up player:', error);
-      // If setup fails, it might be because it's already set up (though we check isSetup)
-      // or native module issue.
     }
   }
 
-  setupInterruptionHandling() {
-    TrackPlayer.addEventListener(Event.RemoteDuck, async (e) => {
-      if (e.paused) {
-        // Interrupted (e.g. phone call)
-        const state = await TrackPlayer.getState();
-        if (state === State.Playing) {
-          this.wasPlayingBeforeInterruption = true;
-          this.isInterrupted = true;
-          await TrackPlayer.pause();
-        }
-      } else {
-        // Interruption ended
-        if (this.isInterrupted && this.wasPlayingBeforeInterruption) {
-          this.isInterrupted = false;
-          this.wasPlayingBeforeInterruption = false;
-          await TrackPlayer.play();
-        }
-      }
-    });
-  }
+  // Interruption handling is largely handled by the OS/Expo AV settings above
 
   async loadSound(soundUri: string | number) {
     if (!this.isSetup) {
       await this.setupPlayer();
     }
 
-    try {
-      await TrackPlayer.reset();
-      
-      // Handle require() assets vs URI strings
-      const track = {
-        url: soundUri,
-        title: 'Alarm',
-        artist: 'Puzzle Alarm',
-        artwork: require('../../assets/icon.png'), // Optional
-      };
+    this.loadFailed = false;
 
-      await TrackPlayer.add([track]);
-      await TrackPlayer.setRepeatMode(RepeatMode.Track);
+    try {
+      await this.unloadSound();
+      
+      let source: any;
+      
+      if (typeof soundUri === 'string') {
+        // Custom sound - use URI directly
+        source = { uri: soundUri };
+      } else {
+        // Bundled asset - use Asset.fromModule to get proper URI
+        const asset = Asset.fromModule(soundUri);
+        await asset.downloadAsync();
+        source = { uri: asset.localUri || asset.uri };
+      }
+      
+      const { sound } = await Audio.Sound.createAsync(
+        source,
+        { shouldPlay: false, isLooping: true }
+      );
+      
+      this.sound = sound;
       
     } catch (error) {
-      console.error('Error loading sound:', error);
-      // Fallback
-      if (typeof soundUri === 'string') {
-        console.log('Attempting to load fallback sound...');
-        await this.loadFallbackSound();
-      } else {
-        throw error;
-      }
+      console.warn('Sound file unavailable:', error);
+      this.loadFailed = true;
+      // Don't throw - allow app to continue without sound
     }
   }
 
   async loadFallbackSound() {
-    try {
-      await TrackPlayer.reset();
-      await TrackPlayer.add([{
-        url: require('../../assets/sounds/default_alarm.mp3'),
-        title: 'Alarm',
-        artist: 'Puzzle Alarm',
-      }]);
-      await TrackPlayer.setRepeatMode(RepeatMode.Track);
-    } catch (error) {
-      console.error('Error loading fallback sound:', error);
-      Alert.alert('Error', 'Failed to load alarm sound.');
+    // Sounds are unavailable - just log and continue silently
+    console.log('Fallback sound unavailable - continuing without audio');
+    this.loadFailed = true;
+  }
+
+  async unloadSound() {
+    if (this.sound) {
+      try {
+        await this.sound.unloadAsync();
+      } catch (error) {
+        // Ignore unload errors
+      }
+      this.sound = null;
     }
   }
 
   async startGradualVolumeIncrease(targetVolume: number, durationMs: number) {
+    if (!this.sound) return;
+
     try {
-      await TrackPlayer.setVolume(0);
-      await TrackPlayer.play();
+      await this.sound.setVolumeAsync(0);
+      await this.sound.playAsync();
 
       const steps = 30;
       const intervalTime = durationMs / steps;
@@ -126,7 +100,9 @@ class AudioService {
           currentVolume = targetVolume;
           this.stopGradualVolumeIncrease();
         }
-        await TrackPlayer.setVolume(currentVolume);
+        if (this.sound) {
+            await this.sound.setVolumeAsync(currentVolume);
+        }
       }, intervalTime);
     } catch (error) {
       console.error('Error starting gradual volume:', error);
@@ -141,44 +117,57 @@ class AudioService {
   }
 
   async playSound(volume: number = 1) {
+    if (!this.sound) return;
     try {
-      await TrackPlayer.setVolume(volume);
-      await TrackPlayer.play();
+      await this.sound.setVolumeAsync(volume);
+      await this.sound.playAsync();
     } catch (error) {
-      console.error('Error playing sound:', error);
+      // Ignore play errors - sound may not be loaded
+      console.log('Could not play sound:', error);
     }
   }
 
   async stopSound() {
     this.stopGradualVolumeIncrease();
-    try {
-      await TrackPlayer.stop();
-      // We don't necessarily need to reset, but it cleans up the queue
-      await TrackPlayer.reset();
-    } catch (error) {
-      console.error('Error stopping sound:', error);
+    if (!this.sound) {
+      // No sound to stop - this is OK
+      return;
     }
+    try {
+      const status = await this.sound.getStatusAsync();
+      if (status.isLoaded) {
+        await this.sound.stopAsync();
+      }
+    } catch (error) {
+      // Ignore stop errors - sound may already be stopped or unloaded
+      console.log('Could not stop sound (already stopped or unloaded)');
+    }
+    // Clean up the sound reference
+    await this.unloadSound();
   }
 
   async setVolume(volume: number) {
+    if (!this.sound) return;
     try {
-      await TrackPlayer.setVolume(volume);
+      await this.sound.setVolumeAsync(volume);
     } catch (error) {
       console.error('Error setting volume:', error);
     }
   }
 
   async pauseSound() {
+    if (!this.sound) return;
     try {
-      await TrackPlayer.pause();
+      await this.sound.pauseAsync();
     } catch (error) {
       console.error('Error pausing sound:', error);
     }
   }
 
   async resumeSound() {
+    if (!this.sound) return;
     try {
-      await TrackPlayer.play();
+      await this.sound.playAsync();
     } catch (error) {
       console.error('Error resuming sound:', error);
     }

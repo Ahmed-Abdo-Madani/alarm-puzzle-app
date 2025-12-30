@@ -5,7 +5,7 @@ import { Button } from '../Button';
 import { PuzzleConfig, PuzzleType } from '../../types/alarm';
 import { MathPuzzleComponent } from './MathPuzzleComponent';
 import { TypingChallengeComponent } from './TypingChallengeComponent';
-import { BarcodeScannerComponent } from './BarcodeScannerComponent';
+// import { BarcodeScannerComponent } from './BarcodeScannerComponent';
 import { MemoryGameComponent } from './MemoryGameComponent';
 import { colors, spacing } from '../../theme';
 import { OnboardingService } from '../../services/OnboardingService';
@@ -81,10 +81,11 @@ export const PuzzleContainer: React.FC<PuzzleContainerProps> = ({
         );
       case PuzzleType.BARCODE:
         return (
-          <BarcodeScannerComponent
-            onComplete={handleComplete}
-            onCancel={onCancel}
-          />
+            <View><Text>Barcode Scanner Disabled</Text><Button text="Complete" onPress={handleComplete} /></View>
+        //   <BarcodeScannerComponent
+        //     onComplete={handleComplete}
+        //     onCancel={onCancel}
+        //   />
         );
       case PuzzleType.MEMORY:
         return (
@@ -125,10 +126,13 @@ export const PuzzleContainer: React.FC<PuzzleContainerProps> = ({
     );
   }
 
-  // Barcode scanner needs full screen without scrollview
-  if (puzzleConfig.type === PuzzleType.BARCODE) {
+  // Barcode scanner and Memory game need full screen without scrollview
+  if (puzzleConfig.type === PuzzleType.BARCODE || puzzleConfig.type === PuzzleType.MEMORY) {
     return (
-      <SafeAreaView style={styles.fullScreenContainer}>
+      <SafeAreaView style={puzzleConfig.type === PuzzleType.BARCODE ? styles.fullScreenContainer : styles.safeArea}>
+        <View style={styles.header}>
+          <Text tx="puzzles.title" variant="h1" style={styles.title} />
+        </View>
         {renderPuzzle()}
       </SafeAreaView>
     );

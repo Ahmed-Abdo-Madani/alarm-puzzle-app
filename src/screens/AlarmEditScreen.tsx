@@ -1,9 +1,55 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react';
+import { StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, Switch, View as RNView, ActivityIndicator, Text as RNText } from 'react-native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { FadeInView } from '../components/animations/FadeInView';
 import { mediumImpact } from '../utils/haptics';
 
-// ...
+import { Alarm, RepeatPattern, AlarmSettings, SnoozeSettings, DifficultyLevel, PuzzleType } from '../types/alarm';
+import { RootStackParamList } from '../types/navigation';
+import { AlarmService } from '../services/AlarmService';
+import AudioService from '../services/AudioService';
+import { Text } from '../components/Text';
+import { Button } from '../components/Button';
+import { RepeatSelector } from '../components/RepeatSelector';
+import { ChallengeConfigCard } from '../components/ChallengeConfigCard';
+import { SoundPickerComponent } from '../components/SoundPickerComponent';
+import { TimePickerModal } from '../components/TimePickerModal';
+import { colors, spacing } from '../theme';
+import { flexRow, paddingHorizontal, textAlign } from '../theme/styles';
+import { formatAlarmTime } from '../utils/alarmTime';
+import { validateAlarm } from '../utils/validation';
+import { getSoundSource } from '../constants/sounds';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'AlarmEdit'>;
+type RouteProps = RouteProp<RootStackParamList, 'AlarmEdit'>;
+
+const DEFAULT_SETTINGS: AlarmSettings = {
+  soundUri: 'default', // Store sound ID, not require() result
+  soundName: 'Default',
+  vibrate: true,
+  volume: 0.8,
+  gradualVolume: false,
+  dismissChallenge: {
+    type: PuzzleType.MATH,
+    difficulty: DifficultyLevel.EASY,
+    enabled: true,
+  },
+};
+
+const DEFAULT_SNOOZE: SnoozeSettings = {
+  duration: 5,
+  maxCount: 3,
+  requireChallenge: true,
+  autoShorten: false,
+  shortenBy: 1,
+  challengeConfig: {
+    type: PuzzleType.MATH,
+    difficulty: DifficultyLevel.EASY,
+    enabled: true,
+  },
+};
 
 export const AlarmEditScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -61,7 +107,7 @@ export const AlarmEditScreen: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (isSaving) return;
 
     const alarmData: Omit<Alarm, 'id' | 'createdAt' | 'updatedAt'> = {
@@ -94,7 +140,7 @@ export const AlarmEditScreen: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [time, label, repeatPattern, repeatDays, settings, snoozeSettings, alarmId, navigation, t, isSaving]);
 
   const handlePreview = async () => {
     mediumImpact();
@@ -102,50 +148,71 @@ export const AlarmEditScreen: React.FC = () => {
       await AudioService.stopSound();
       setIsPreviewing(false);
     } else {
-      try {
-        await AudioService.loadSound(settings.soundUri);
-        
-        Alert.alert(
-          t('alarm.preview'),
-          `${t('alarm.time')}: ${time}\n${t('alarm.repeat')}: ${t(`alarm.repeat${repeatPattern.charAt(0).toUpperCase() + repeatPattern.slice(1)}`)}`,
-          [
-            {
-              text: t('sound.stopPreview'),
-              onPress: async () => {
-                await AudioService.stopSound();
-                setIsPreviewing(false);
-              }
+      const soundSource = getSoundSource(settings.soundUri);
+      await AudioService.loadSound(soundSource);
+      
+      Alert.alert(
+        t('alarm.preview'),
+        `${t('alarm.time')}: ${time}\n${t('alarm.repeat')}: ${t(`alarm.repeat${repeatPattern.charAt(0).toUpperCase() + repeatPattern.slice(1)}`)}`,
+        [
+          {
+            text: t('common.ok'),
+            onPress: async () => {
+              await AudioService.stopSound();
+              setIsPreviewing(false);
             }
-          ]
-        );
+          }
+        ]
+      );
 
-        if (settings.gradualVolume) {
-          await AudioService.startGradualVolumeIncrease(settings.volume, 5000);
-        } else {
-          await AudioService.playSound(settings.volume);
-        }
-        setIsPreviewing(true);
-      } catch (error) {
-        console.error('Preview error', error);
-        Alert.alert(t('common.error'), t('sound.previewError'));
+      if (settings.gradualVolume) {
+        await AudioService.startGradualVolumeIncrease(settings.volume, 5000);
+      } else {
+        await AudioService.playSound(settings.volume);
       }
+      setIsPreviewing(true);
     }
+  };
+
+  const handleDelete = () => {
+    if (!alarmId) return;
+    
+    Alert.alert(
+      t('alarm.deleteTitle'),
+      t('alarm.deleteConfirm'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AlarmService.deleteAlarm(alarmId);
+              navigation.goBack();
+            } catch (error) {
+              console.error('Failed to delete alarm:', error);
+              Alert.alert(t('common.error'), t('alarm.deleteError'));
+            }
+          },
+        },
+      ]
+    );
   };
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: alarmId ? t('alarm.editAlarm') : t('alarm.newAlarm'),
       headerLeft: () => (
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text color="primary" tx="common.cancel" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingHorizontal: 8 }}>
+          <RNText style={{ color: colors.surface, fontSize: 16 }}>{t('common.cancel')}</RNText>
         </TouchableOpacity>
       ),
       headerRight: () => (
-        <TouchableOpacity onPress={handleSave} disabled={isSaving}>
+        <TouchableOpacity onPress={handleSave} disabled={isSaving} style={{ paddingHorizontal: 8 }}>
           {isSaving ? (
-            <ActivityIndicator size="small" color={colors.primary} />
+            <ActivityIndicator size="small" color={colors.surface} />
           ) : (
-            <Text color="primary" tx="common.save" style={{ fontWeight: 'bold' }} />
+            <RNText style={{ color: colors.surface, fontSize: 16, fontWeight: 'bold' }}>{t('common.save')}</RNText>
           )}
         </TouchableOpacity>
       ),
@@ -227,6 +294,12 @@ export const AlarmEditScreen: React.FC = () => {
         onPress={handlePreview}
         style={styles.previewButton}
       />
+
+      {alarmId && (
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <Text style={styles.deleteButtonText}>{t('common.delete')}</Text>
+        </TouchableOpacity>
+      )}
 
       {time ? (
         <TimePickerModal
@@ -312,5 +385,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textSecondary,
     ...textAlign(),
+  },
+  deleteButton: {
+    marginTop: spacing.xl,
+    backgroundColor: 'rgba(255, 59, 48, 0.15)',
+    borderRadius: 12,
+    padding: spacing.md,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#FF3B30',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

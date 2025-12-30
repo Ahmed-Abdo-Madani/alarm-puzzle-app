@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Alert, SafeAreaView } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Alert, SafeAreaView, BackHandler } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
@@ -15,6 +15,8 @@ import AudioService from '../services/AudioService';
 import SnoozeService from '../services/SnoozeService';
 import { UserSettingsService } from '../services/UserSettingsService';
 import { PuzzleContainer } from '../components/puzzles/PuzzleContainer';
+import NativeAlarmService from '../services/NativeAlarmService';
+import { getSoundSource } from '../constants/sounds';
 
 import { heavyImpact } from '../utils/haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
@@ -82,8 +84,12 @@ export const AlarmRingingScreen = () => {
 
         // Load and play sound
         try {
-          const soundUri = alarmData.settings.soundUri || require('../../assets/sounds/default_alarm.mp3');
-          await AudioService.loadSound(soundUri);
+          // Get the proper sound source (handles stored IDs and require() results)
+          const soundSource = alarmData.settings.soundUri 
+            ? getSoundSource(alarmData.settings.soundUri)
+            : getSoundSource('default');
+          
+          await AudioService.loadSound(soundSource);
           
           if (alarmData.settings.gradualVolume) {
             await AudioService.startGradualVolumeIncrease(alarmData.settings.volume, 30000);
@@ -92,7 +98,13 @@ export const AlarmRingingScreen = () => {
           }
         } catch (error) {
           console.error('Failed to play sound', error);
-          Alert.alert(t('common.error'), t('sound.loadError'));
+          // Try to play default sound as fallback
+          try {
+            await AudioService.loadSound(getSoundSource('default'));
+            await AudioService.playSound(alarmData.settings.volume);
+          } catch (e) {
+            console.error('Failed to play fallback sound', e);
+          }
         }
       } catch (error) {
         console.error('Error initializing ringing screen', error);
@@ -118,10 +130,27 @@ export const AlarmRingingScreen = () => {
         const notificationId = await SnoozeService.snoozeAlarm(alarm, snoozeCount);
         await SnoozeService.incrementSnoozeCount(alarm.id);
         
-        Alert.alert(t('ringing.snoozedFor', { minutes: alarm.snoozeSettings.duration }));
+        // Stop sound - ignore errors if sound wasn't playing
+        try {
+          await AudioService.stopSound();
+        } catch (e) {
+          // Ignore
+        }
         
-        await AudioService.stopSound();
-        navigation.goBack();
+        // Dismiss the native alarm notification
+        try {
+          await NativeAlarmService.dismissAlarmNotification(alarm.id);
+        } catch (e) {
+          // Ignore
+        }
+        
+        // Show brief message then minimize app
+        Alert.alert(
+          t('ringing.snoozed'),
+          t('ringing.snoozedFor', { minutes: alarm.snoozeSettings.duration }),
+          [{ text: 'OK', onPress: () => BackHandler.exitApp() }],
+          { cancelable: false }
+        );
       } else {
         Alert.alert(t('common.error'), 'Max snoozes reached');
       }
@@ -146,17 +175,33 @@ export const AlarmRingingScreen = () => {
     if (!alarm) return;
 
     try {
-      await AudioService.stopSound();
+      // Stop sound - ignore errors if sound wasn't playing
+      try {
+        await AudioService.stopSound();
+      } catch (e) {
+        // Ignore - sound may not have been playing
+      }
+      
       await SnoozeService.resetSnoozeCount(alarm.id);
 
       if (alarm.repeatPattern === 'once') {
         await AlarmService.updateAlarm(alarm.id, { enabled: false });
       }
 
-      navigation.goBack();
+      // Dismiss the native alarm notification
+      try {
+        await NativeAlarmService.dismissAlarmNotification(alarm.id);
+      } catch (e) {
+        // Ignore - notification may already be dismissed
+      }
+
+      // Minimize app instead of navigating back
+      // This is better UX when alarm wakes device from lock screen
+      BackHandler.exitApp();
     } catch (error) {
       console.error('Dismiss error', error);
-      Alert.alert(t('common.error'), t('ringing.dismissError'));
+      // Still try to exit the app
+      BackHandler.exitApp();
     }
   };
 

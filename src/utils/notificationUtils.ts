@@ -7,7 +7,7 @@ export const mapRepeatDaysToExpoFormat = (days: number[]): number[] => {
   return days.map(day => day + 1);
 };
 
-export const getAlarmTriggerTime = (alarm: Alarm): Date => {
+export const getAlarmTriggerTime = (alarm: Alarm): Date | null => {
   return getNextOccurrence(alarm);
 };
 

@@ -16,7 +16,6 @@
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": [
-          "audio",
           "audio"
         ],
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs camera access for barcode scanning challenges."
@@ -31,7 +30,15 @@
       "permissions": [
         "WAKE_LOCK",
         "VIBRATE",
-        "android.permission.CAMERA"
+        "android.permission.CAMERA",
+        "android.permission.USE_FULL_SCREEN_INTENT",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.USE_EXACT_ALARM",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.DISABLE_KEYGUARD",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.POST_NOTIFICATIONS"
       ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -42,7 +49,6 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "react-native-reanimated/plugin",
       "@react-native-community/datetimepicker",
       [
         "expo-notifications",
@@ -59,13 +65,14 @@
         }
       ],
       [
-        "react-native-vision-camera",
+        "expo-camera",
         {
-          "cameraPermissionText": "$(PRODUCT_NAME) needs camera access for barcode scanning challenges.",
-          "enableMicrophonePermission": false
+          "cameraPermission": "$(PRODUCT_NAME) needs camera access for barcode scanning challenges."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-asset",
+      "expo-localization"
     ]
   }
 }

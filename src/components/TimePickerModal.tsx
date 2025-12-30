@@ -49,8 +49,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
       <DateTimePicker
         value={date}
         mode="time"
-        is24Hour={true}
-        display="default"
+        is24Hour={false}
+        display="spinner"
         onChange={onChange}
         accessibilityLabel={t('accessibility.selectTime')}
         accessibilityHint={t('accessibility.timePickerHint')}
@@ -70,8 +70,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
           <DateTimePicker
             value={date}
             mode="time"
-            is24Hour={true}
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            is24Hour={false}
+            display="spinner"
             onChange={onChange}
             textColor={colors.text}
             accessibilityLabel={t('accessibility.selectTime')}

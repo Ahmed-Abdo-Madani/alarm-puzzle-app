@@ -13,9 +13,9 @@ export const NotificationChannelService = {
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#FF8C42',
-        sound: 'default-alarm.mp3',
+        sound: 'default_alarm', // Android uses raw resource name without extension
         enableLights: true,
-        enableVibration: true,
+        enableVibrate: true,
         showBadge: true,
         lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
         bypassDnd: true,

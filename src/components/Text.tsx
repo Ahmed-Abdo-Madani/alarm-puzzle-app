@@ -6,7 +6,7 @@ import { colors, typography } from '../theme';
 
 interface TextProps extends RNTextProps {
   tx?: string;
-  txOptions?: object;
+  txOptions?: Record<string, unknown>;
   variant?: keyof typeof typography;
   color?: keyof typeof colors;
 }
@@ -21,7 +21,7 @@ export const Text: React.FC<TextProps> = ({
   ...rest
 }) => {
   const { t } = useTranslation();
-  const i18nText = tx ? t(tx, txOptions) : children;
+  const i18nText = tx ? t(tx, txOptions as Record<string, string>) : children;
 
   const content = i18nText || children;
 
