@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, Switch, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { UserSettingsService } from '../services/UserSettingsService';
 import { UserSettings } from '../types/user';
@@ -12,10 +13,17 @@ import { colors, spacing, typography } from '../theme';
 import { flexRow, textAlign } from '../theme/styles';
 
 export const SettingsScreen = () => {
+  const navigation = useNavigation();
   const { t, i18n } = useTranslation();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: t('settings.title'),
+    });
+  }, [navigation, t]);
 
   useEffect(() => {
     loadSettings();

@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useLayoutEffect } from 'react';
 import { StyleSheet, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { Alarm } from '../types/alarm';
 import { RootStackParamList } from '../types/navigation';
 import { AlarmService } from '../services/AlarmService';
@@ -19,9 +20,16 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'AlarmList'>
 
 export const AlarmListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { t } = useTranslation();
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: t('alarm.title'),
+    });
+  }, [navigation, t]);
 
   const loadAlarms = useCallback(async () => {
     try {

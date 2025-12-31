@@ -5,7 +5,7 @@ import { Button } from '../Button';
 import { PuzzleConfig, PuzzleType } from '../../types/alarm';
 import { MathPuzzleComponent } from './MathPuzzleComponent';
 import { TypingChallengeComponent } from './TypingChallengeComponent';
-// import { BarcodeScannerComponent } from './BarcodeScannerComponent';
+import { BarcodeScannerComponent } from './BarcodeScannerComponent';
 import { MemoryGameComponent } from './MemoryGameComponent';
 import { colors, spacing } from '../../theme';
 import { OnboardingService } from '../../services/OnboardingService';
@@ -81,11 +81,10 @@ export const PuzzleContainer: React.FC<PuzzleContainerProps> = ({
         );
       case PuzzleType.BARCODE:
         return (
-            <View><Text>Barcode Scanner Disabled</Text><Button text="Complete" onPress={handleComplete} /></View>
-        //   <BarcodeScannerComponent
-        //     onComplete={handleComplete}
-        //     onCancel={onCancel}
-        //   />
+          <BarcodeScannerComponent
+            onComplete={handleComplete}
+            onCancel={onCancel}
+          />
         );
       case PuzzleType.MEMORY:
         return (
