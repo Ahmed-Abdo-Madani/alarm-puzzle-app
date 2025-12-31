@@ -28,7 +28,10 @@ export const AlarmRingingScreen = () => {
   const route = useRoute<AlarmRingingRouteProp>();
   const navigation = useNavigation();
   const { t } = useTranslation();
-  const { alarmId } = route.params;
+  const { alarmId: rawAlarmId } = route.params;
+  
+  // Strip any suffix (e.g., "_0") from repeating alarm IDs to get the base alarm ID
+  const alarmId = rawAlarmId.includes('_') ? rawAlarmId.split('_')[0] : rawAlarmId;
 
   const [alarm, setAlarm] = useState<Alarm | null>(null);
   const [loading, setLoading] = useState(true);
@@ -127,6 +130,13 @@ export const AlarmRingingScreen = () => {
 
     try {
       if (SnoozeService.canSnooze(alarm, snoozeCount)) {
+        // Calculate the actual snooze duration (same logic as SnoozeService)
+        const { duration, autoShorten, shortenBy } = alarm.snoozeSettings;
+        let actualDuration = duration;
+        if (autoShorten) {
+          actualDuration = Math.max(1, duration - (snoozeCount * shortenBy));
+        }
+        
         const notificationId = await SnoozeService.snoozeAlarm(alarm, snoozeCount);
         await SnoozeService.incrementSnoozeCount(alarm.id);
         
@@ -154,7 +164,7 @@ export const AlarmRingingScreen = () => {
         // Show brief message then minimize app
         Alert.alert(
           t('ringing.snoozed'),
-          t('ringing.snoozedFor', { minutes: alarm.snoozeSettings.duration }),
+          t('ringing.snoozedFor', { minutes: actualDuration }),
           [{ text: 'OK', onPress: () => BackHandler.exitApp() }],
           { cancelable: false }
         );

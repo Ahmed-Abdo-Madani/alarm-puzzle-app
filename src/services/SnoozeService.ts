@@ -1,6 +1,8 @@
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 import { StorageService } from './StorageService';
 import { Alarm, PuzzleConfig, DifficultyLevel } from '../types/alarm';
+import NativeAlarmService from './NativeAlarmService';
 
 class SnoozeService {
   async snoozeAlarm(alarm: Alarm, snoozeCount: number): Promise<string> {
@@ -11,8 +13,21 @@ class SnoozeService {
       snoozeDuration = Math.max(1, duration - (snoozeCount * shortenBy));
     }
 
-    const triggerDate = new Date(Date.now() + snoozeDuration * 60 * 1000);
+    const triggerTime = Date.now() + snoozeDuration * 60 * 1000;
+    const snoozeId = `${alarm.id}_snooze`;
 
+    // Use native AlarmManager on Android for reliable wake-up
+    if (Platform.OS === 'android') {
+      try {
+        await NativeAlarmService.scheduleAlarm(snoozeId, triggerTime);
+        return snoozeId;
+      } catch (error) {
+        console.error('Native snooze scheduling failed, falling back to notifications:', error);
+      }
+    }
+
+    // Fallback to expo-notifications
+    const triggerDate = new Date(triggerTime);
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
         title: alarm.label || 'Alarm',
