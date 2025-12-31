@@ -30,8 +30,11 @@ export const AlarmRingingScreen = () => {
   const { t } = useTranslation();
   const { alarmId: rawAlarmId } = route.params;
   
-  // Strip any suffix (e.g., "_0") from repeating alarm IDs to get the base alarm ID
-  const alarmId = rawAlarmId.includes('_') ? rawAlarmId.split('_')[0] : rawAlarmId;
+  // Strip any suffix (e.g., "_0", "_snooze") from repeating/snooze alarm IDs to get the base alarm ID
+  // UUID format is xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx, so we split on underscore after the UUID
+  const alarmId = rawAlarmId.replace(/_\d+$|_snooze$/, '');
+  
+  console.log('AlarmRingingScreen - rawAlarmId:', rawAlarmId, '-> alarmId:', alarmId);
 
   const [alarm, setAlarm] = useState<Alarm | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,37 +71,55 @@ export const AlarmRingingScreen = () => {
   });
 
   useEffect(() => {
+    let mounted = true;
+    
     const init = async () => {
       try {
+        console.log('AlarmRingingScreen - initializing with alarmId:', alarmId);
         await activateKeepAwakeAsync();
         const alarmData = await AlarmService.getAlarmById(alarmId);
         
+        console.log('AlarmRingingScreen - alarmData:', alarmData ? 'found' : 'NOT FOUND');
+        
         if (!alarmData) {
-          setLoading(false);
+          console.error('AlarmRingingScreen - Alarm not found for ID:', alarmId);
+          if (mounted) setLoading(false);
           return;
         }
 
-        setAlarm(alarmData);
+        if (mounted) {
+          setAlarm(alarmData);
+          // Set loading to false immediately after setting alarm
+          // Sound loading happens in background
+          setLoading(false);
+        }
+        
+        console.log('AlarmRingingScreen - alarm set, getting snooze count');
         const count = await SnoozeService.getSnoozeCount(alarmId);
-        setSnoozeCount(count);
+        if (mounted) setSnoozeCount(count);
+        console.log('AlarmRingingScreen - snooze count:', count);
 
         const settings = await UserSettingsService.getUserSettings();
-        setCurrentLanguage(settings.language);
+        if (mounted) setCurrentLanguage(settings.language);
+        console.log('AlarmRingingScreen - loading sound');
 
-        // Load and play sound
+        // Load and play sound (in background, don't block UI)
         try {
           // Get the proper sound source (handles stored IDs and require() results)
           const soundSource = alarmData.settings.soundUri 
             ? getSoundSource(alarmData.settings.soundUri)
             : getSoundSource('default');
           
+          console.log('AlarmRingingScreen - sound source:', soundSource);
           await AudioService.loadSound(soundSource);
+          console.log('AlarmRingingScreen - sound loaded, playing');
           
           if (alarmData.settings.gradualVolume) {
             await AudioService.startGradualVolumeIncrease(alarmData.settings.volume, 30000);
           } else {
             await AudioService.playSound(alarmData.settings.volume);
           }
+          console.log('AlarmRingingScreen - sound playing');
         } catch (error) {
           console.error('Failed to play sound', error);
           // Try to play default sound as fallback
@@ -111,14 +132,14 @@ export const AlarmRingingScreen = () => {
         }
       } catch (error) {
         console.error('Error initializing ringing screen', error);
-      } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
     init();
 
     return () => {
+      mounted = false;
       AudioService.stopGradualVolumeIncrease();
       AudioService.stopSound();
       deactivateKeepAwake();
@@ -255,11 +276,28 @@ export const AlarmRingingScreen = () => {
     performSnooze();
   };
 
-  if (loading || !alarm) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
+    );
+  }
+
+  if (!alarm) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <Text variant="h2" style={styles.labelText}>{t('common.error')}</Text>
+          <Text style={styles.snoozeCountText}>Alarm not found (ID: {alarmId})</Text>
+          <Button
+            tx="common.close"
+            variant="primary"
+            onPress={() => BackHandler.exitApp()}
+            style={styles.dismissButton}
+          />
+        </View>
+      </SafeAreaView>
     );
   }
 
