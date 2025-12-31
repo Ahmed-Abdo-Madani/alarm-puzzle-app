@@ -144,6 +144,13 @@ export const AlarmRingingScreen = () => {
           // Ignore
         }
         
+        // Disable lock screen mode before exiting
+        try {
+          await NativeAlarmService.disableAlarmMode();
+        } catch (e) {
+          // Ignore
+        }
+        
         // Show brief message then minimize app
         Alert.alert(
           t('ringing.snoozed'),
@@ -195,12 +202,24 @@ export const AlarmRingingScreen = () => {
         // Ignore - notification may already be dismissed
       }
 
+      // Disable lock screen mode before exiting
+      try {
+        await NativeAlarmService.disableAlarmMode();
+      } catch (e) {
+        // Ignore
+      }
+
       // Minimize app instead of navigating back
       // This is better UX when alarm wakes device from lock screen
       BackHandler.exitApp();
     } catch (error) {
       console.error('Dismiss error', error);
-      // Still try to exit the app
+      // Still try to disable alarm mode and exit the app
+      try {
+        await NativeAlarmService.disableAlarmMode();
+      } catch (e) {
+        // Ignore
+      }
       BackHandler.exitApp();
     }
   };

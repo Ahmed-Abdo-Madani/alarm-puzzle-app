@@ -9,6 +9,7 @@ export interface NativeAlarmService {
   canScheduleExactAlarms: () => Promise<boolean>;
   openExactAlarmSettings: () => Promise<boolean>;
   getPendingAlarmId: () => Promise<string | null>;
+  disableAlarmMode: () => Promise<boolean>;
 }
 
 const NativeAlarmServiceImpl: NativeAlarmService = {
@@ -52,6 +53,13 @@ const NativeAlarmServiceImpl: NativeAlarmService = {
       return AlarmModule.getPendingAlarmId();
     }
     return null;
+  },
+
+  async disableAlarmMode(): Promise<boolean> {
+    if (Platform.OS === 'android' && AlarmModule) {
+      return AlarmModule.disableAlarmMode();
+    }
+    return true; // No-op on iOS
   },
 };
 
