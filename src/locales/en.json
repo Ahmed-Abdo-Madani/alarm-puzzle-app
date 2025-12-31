@@ -167,6 +167,7 @@
     "minutes": "min",
     "times": "times",
     "english": "English",
+    "arabic": "Arabic",
     "snoozeCount": "Snooze {{count}}/{{max}}"
   },
   "onboarding": {

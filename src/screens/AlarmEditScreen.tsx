@@ -76,7 +76,6 @@ export const AlarmEditScreen: React.FC = () => {
   const [snoozeSettings, setSnoozeSettings] = useState<SnoozeSettings>(DEFAULT_SNOOZE);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [loading, setLoading] = useState(!!alarmId);
-  const [isPreviewing, setIsPreviewing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -142,38 +141,6 @@ export const AlarmEditScreen: React.FC = () => {
     }
   }, [time, label, repeatPattern, repeatDays, settings, snoozeSettings, alarmId, navigation, t, isSaving]);
 
-  const handlePreview = async () => {
-    mediumImpact();
-    if (isPreviewing) {
-      await AudioService.stopSound();
-      setIsPreviewing(false);
-    } else {
-      const soundSource = getSoundSource(settings.soundUri);
-      await AudioService.loadSound(soundSource);
-      
-      Alert.alert(
-        t('alarm.preview'),
-        `${t('alarm.time')}: ${time}\n${t('alarm.repeat')}: ${t(`alarm.repeat${repeatPattern.charAt(0).toUpperCase() + repeatPattern.slice(1)}`)}`,
-        [
-          {
-            text: t('common.ok'),
-            onPress: async () => {
-              await AudioService.stopSound();
-              setIsPreviewing(false);
-            }
-          }
-        ]
-      );
-
-      if (settings.gradualVolume) {
-        await AudioService.startGradualVolumeIncrease(settings.volume, 5000);
-      } else {
-        await AudioService.playSound(settings.volume);
-      }
-      setIsPreviewing(true);
-    }
-  };
-
   const handleDelete = () => {
     if (!alarmId) return;
     
@@ -202,6 +169,7 @@ export const AlarmEditScreen: React.FC = () => {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: alarmId ? t('alarm.editAlarm') : t('alarm.newAlarm'),
+      headerTitleAlign: 'center',
       headerLeft: () => (
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingHorizontal: 8 }}>
           <RNText style={{ color: colors.surface, fontSize: 16 }}>{t('common.cancel')}</RNText>
@@ -287,13 +255,6 @@ export const AlarmEditScreen: React.FC = () => {
           />
         </RNView>
       </RNView>
-
-      <Button
-        tx={isPreviewing ? 'sound.stopPreview' : 'alarm.preview'}
-        variant="outline"
-        onPress={handlePreview}
-        style={styles.previewButton}
-      />
 
       {alarmId && (
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>

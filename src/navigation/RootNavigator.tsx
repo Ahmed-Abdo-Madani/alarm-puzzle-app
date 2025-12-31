@@ -29,15 +29,6 @@ const TabNavigator = createBottomTabNavigator({
         ),
       },
     },
-    Test: {
-      screen: TestScreen,
-      options: {
-        title: 'Test',
-        tabBarIcon: ({ color, size }) => (
-          <Text style={{ fontSize: size, color }}>🧪</Text>
-        ),
-      },
-    },
   },
   screenOptions: {
     headerStyle: {
